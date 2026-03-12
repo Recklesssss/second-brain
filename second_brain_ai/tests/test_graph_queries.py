@@ -1,15 +1,18 @@
-from core.graph_queries import GraphQueryUtilities
+from core.graph_queries import GraphQueryService
 
 
-def test_graph_queries_initialization():
-    gq = GraphQueryUtilities()
-    assert gq is not None
+def test_query_service_creation():
+
+    service = GraphQueryService()
+
+    assert service is not None
 
 
-def test_methods_exist():
-    gq = GraphQueryUtilities()
+def test_query_methods_exist():
 
-    assert hasattr(gq, "get_related_concepts")
-    assert hasattr(gq, "get_dependencies")
-    assert hasattr(gq, "get_concepts_in_domain")
-    assert hasattr(gq, "find_shortest_path")
+    service = GraphQueryService()
+
+    assert hasattr(service, "get_related_concepts")
+    assert hasattr(service, "get_domain_concepts")
+    assert hasattr(service, "get_dependencies")
+    assert hasattr(service, "find_concept_by_name")

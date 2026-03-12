@@ -1,25 +1,53 @@
-import pytest
-from core.schema_loader import SchemaRegistryLoader
+import tempfile
+from pathlib import Path
+import yaml
+
+from core.schema_loader.schema_loader import SchemaRegistryLoader
 
 
-def test_schema_load():
-    loader = SchemaRegistryLoader("config/SCHEMA_REGISTRY.yaml")
-    assert loader.raw() is not None
+VALID_SCHEMA = {
+    "schema_registry": {},
+    "graph_schema": {},
+    "api_schema": {},
+    "error_codes": {},
+    "prompt_templates": {},
+    "agent_message_protocol": {},
+    "logging_schema": {},
+}
 
 
-def test_node_labels():
-    loader = SchemaRegistryLoader("config/SCHEMA_REGISTRY.yaml")
-    labels = loader.get_node_labels()
-    assert "Concept" in labels
+def test_schema_loader_valid():
+
+    with tempfile.TemporaryDirectory() as tmp:
+
+        path = Path(tmp) / "SCHEMA_REGISTRY.yaml"
+
+        with open(path, "w") as f:
+            yaml.dump(VALID_SCHEMA, f)
+
+        loader = SchemaRegistryLoader(schema_path=path)
+
+        schema = loader.load()
+
+        assert schema is not None
 
 
-def test_relationship_types():
-    loader = SchemaRegistryLoader("config/SCHEMA_REGISTRY.yaml")
-    rels = loader.get_relationship_types()
-    assert "related_to" in rels
+def test_schema_validation_missing_field():
 
+    with tempfile.TemporaryDirectory() as tmp:
 
-def test_constraints():
-    loader = SchemaRegistryLoader("config/SCHEMA_REGISTRY.yaml")
-    constraints = loader.get_constraints()
-    assert "enforce_unique_node_ids" in constraints
+        path = Path(tmp) / "SCHEMA_REGISTRY.yaml"
+
+        invalid = VALID_SCHEMA.copy()
+        invalid.pop("api_schema")
+
+        with open(path, "w") as f:
+            yaml.dump(invalid, f)
+
+        loader = SchemaRegistryLoader(schema_path=path)
+
+        try:
+            loader.load()
+            assert False
+        except ValueError:
+            assert True

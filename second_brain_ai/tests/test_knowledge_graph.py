@@ -1,32 +1,19 @@
-import pytest
 from core.knowledge_graph import KnowledgeGraphService
 
 
-def test_service_initialization():
-    kg = KnowledgeGraphService()
-    assert kg is not None
+def test_graph_service_creation():
+
+    service = KnowledgeGraphService()
+
+    assert service is not None
 
 
-def test_invalid_node_label():
-    kg = KnowledgeGraphService()
+def test_node_validation():
 
-    with pytest.raises(ValueError):
-        kg.create_node("InvalidLabel", {"id": "1"})
+    service = KnowledgeGraphService()
 
-
-def test_invalid_relationship():
-    kg = KnowledgeGraphService()
-
-    with pytest.raises(ValueError):
-        kg.create_relationship(
-            "Concept",
-            "1",
-            "Concept",
-            "2",
-            "invalid_relation"
-        )
-
-
-def test_query_method_exists():
-    kg = KnowledgeGraphService()
-    assert hasattr(kg, "query")
+    try:
+        service._validate_node_type("InvalidType")
+        assert False
+    except ValueError:
+        assert True

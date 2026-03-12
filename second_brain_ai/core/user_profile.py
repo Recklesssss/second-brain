@@ -1,86 +1,98 @@
-from core.memory_system import MemoryStorageService
-from core.logging.logger import LoggerFactory
+from typing import Dict, Any, Optional
+from datetime import datetime
+
+from database.neo4j_client import get_neo4j_client
+from core.logging import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class UserProfileService:
     """
-    Manages persistent user profiles and learning preferences.
+    Manages persistent user learning profiles.
     """
 
     def __init__(self):
-        self.logger = LoggerFactory.create_logger("user_profile")
-        self.memory = MemoryStorageService()
+        self.client = get_neo4j_client()
 
-    def create_user(self, user_id: str, properties: dict):
-        """
-        Create a new user node.
-        """
-        properties["user_id"] = user_id
-        result = self.memory.store_memory("User", properties)
+    def create_profile(
+        self,
+        user_id: str,
+        profile_data: Dict[str, Any],
+    ) -> Dict[str, Any]:
 
-        self.logger.info(f"User profile created: {user_id}")
-        return result
-
-    def get_user(self, user_id: str):
-        """
-        Retrieve user profile by user_id.
-        """
         query = """
-        MATCH (u:User {user_id: $user_id})
+        CREATE (u:Insight {
+            id: $id,
+            type: "user_profile",
+            data: $data,
+            created_at: $created_at
+        })
         RETURN u
         """
 
-        result = self.memory.search_memory(query, {"user_id": user_id})
+        params = {
+            "id": user_id,
+            "data": profile_data,
+            "created_at": datetime.utcnow().isoformat(),
+        }
 
-        if result:
-            return result[0]["u"]
+        result = self.client.run_query(query, params)
 
-        return None
+        return result[0] if result else {}
 
-    def add_preference(self, user_id: str, preference: dict):
+    def get_profile(self, user_id: str) -> Optional[Dict[str, Any]]:
+
+        query = """
+        MATCH (u:Insight {id:$id, type:"user_profile"})
+        RETURN u
         """
-        Add a preference node linked to the user.
-        """
-        pref_node = self.memory.store_memory("Preference", preference)
 
-        self.memory.link_memory(
-            "User",
-            user_id,
-            "Preference",
-            preference.get("id", ""),
-            "HAS_PREFERENCE"
+        result = self.client.run_query(query, {"id": user_id})
+
+        return result[0] if result else None
+
+    def update_profile(
+        self,
+        user_id: str,
+        updates: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+
+        query = """
+        MATCH (u:Insight {id:$id, type:"user_profile"})
+        SET u.data += $updates
+        RETURN u
+        """
+
+        result = self.client.run_query(
+            query,
+            {
+                "id": user_id,
+                "updates": updates,
+            },
         )
 
-        return pref_node
+        return result[0] if result else None
 
-    def add_skill(self, user_id: str, skill: dict):
+    def delete_profile(self, user_id: str):
+
+        query = """
+        MATCH (u:Insight {id:$id, type:"user_profile"})
+        DETACH DELETE u
         """
-        Link a skill node to the user.
-        """
-        skill_node = self.memory.store_memory("Skill", skill)
 
-        self.memory.link_memory(
-            "User",
-            user_id,
-            "Skill",
-            skill.get("id", ""),
-            "HAS_SKILL"
-        )
+        self.client.run_query(query, {"id": user_id})
 
-        return skill_node
 
-    def add_learning_goal(self, user_id: str, goal: dict):
-        """
-        Add a learning goal to the user profile.
-        """
-        goal_node = self.memory.store_memory("LearningGoal", goal)
+_global_user_profile_service: Optional[UserProfileService] = None
 
-        self.memory.link_memory(
-            "User",
-            user_id,
-            "LearningGoal",
-            goal.get("id", ""),
-            "HAS_GOAL"
-        )
 
-        return goal_node
+def get_user_profile_service() -> UserProfileService:
+
+    global _global_user_profile_service
+
+    if _global_user_profile_service is None:
+        _global_user_profile_service = UserProfileService()
+
+    return _global_user_profile_service

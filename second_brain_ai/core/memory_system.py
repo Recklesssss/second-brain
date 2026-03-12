@@ -1,49 +1,91 @@
+from typing import Dict, Any, List, Optional
 from datetime import datetime
-from core.knowledge_graph import KnowledgeGraphService
-from core.logging.logger import LoggerFactory
+
+from database.neo4j_client import get_neo4j_client
+from core.logging import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class MemoryStorageService:
     """
-    Persistent AI memory storage system.
+    Persistent memory storage for agents and system insights.
     """
 
     def __init__(self):
-        self.logger = LoggerFactory.create_logger("memory_system")
-        self.graph = KnowledgeGraphService()
+        self.client = get_neo4j_client()
 
-    def store_memory(self, label: str, properties: dict):
-        """
-        Store a memory node in the knowledge graph.
-        """
-        properties["created_at"] = datetime.utcnow().isoformat()
+    def store_memory(
+        self,
+        memory_id: str,
+        text: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
 
-        result = self.graph.create_node(label, properties)
+        metadata = metadata or {}
 
-        self.logger.info(f"Memory stored: {label}")
+        query = """
+        CREATE (m:Insight {
+            id: $id,
+            text: $text,
+            created_at: $created_at,
+            metadata: $metadata
+        })
+        RETURN m
+        """
 
-        return result
+        params = {
+            "id": memory_id,
+            "text": text,
+            "created_at": datetime.utcnow().isoformat(),
+            "metadata": metadata,
+        }
 
-    def get_memory_by_id(self, label: str, memory_id: str):
-        """
-        Retrieve memory by ID.
-        """
-        return self.graph.get_node_by_id(label, memory_id)
+        result = self.client.run_query(query, params)
 
-    def link_memory(self, from_label, from_id, to_label, to_id, relationship):
-        """
-        Create relationship between memories.
-        """
-        return self.graph.create_relationship(
-            from_label,
-            from_id,
-            to_label,
-            to_id,
-            relationship
-        )
+        return result[0] if result else {}
 
-    def search_memory(self, cypher_query: str, parameters: dict = None):
+    def get_memory(self, memory_id: str) -> Optional[Dict[str, Any]]:
+
+        query = """
+        MATCH (m:Insight {id:$id})
+        RETURN m
         """
-        Perform memory search queries.
+
+        result = self.client.run_query(query, {"id": memory_id})
+
+        return result[0] if result else None
+
+    def list_memories(self, limit: int = 50) -> List[Dict[str, Any]]:
+
+        query = """
+        MATCH (m:Insight)
+        RETURN m
+        ORDER BY m.created_at DESC
+        LIMIT $limit
         """
-        return self.graph.query(cypher_query, parameters or {})
+
+        return self.client.run_query(query, {"limit": limit})
+
+    def delete_memory(self, memory_id: str) -> None:
+
+        query = """
+        MATCH (m:Insight {id:$id})
+        DETACH DELETE m
+        """
+
+        self.client.run_query(query, {"id": memory_id})
+
+
+_global_memory_service: Optional[MemoryStorageService] = None
+
+
+def get_memory_service() -> MemoryStorageService:
+
+    global _global_memory_service
+
+    if _global_memory_service is None:
+        _global_memory_service = MemoryStorageService()
+
+    return _global_memory_service

@@ -1,58 +1,78 @@
-from core.knowledge_graph import KnowledgeGraphService
-from core.logging.logger import LoggerFactory
+from typing import List, Dict, Any
+from database.neo4j_client import get_neo4j_client
+from core.schema_loader import get_schema_registry
+from core.logging import get_logger
 
 
-class GraphQueryUtilities:
+logger = get_logger(__name__)
+
+
+class GraphQueryService:
     """
-    Advanced query utilities for exploring the knowledge graph.
+    High-level query utilities for the knowledge graph.
     """
 
     def __init__(self):
-        self.logger = LoggerFactory.create_logger("graph_queries")
-        self.graph = KnowledgeGraphService()
 
-    def get_related_concepts(self, concept_id: str):
+        self.client = get_neo4j_client()
+        self.schema = get_schema_registry().get_graph_schema()
+
+    def get_related_concepts(self, concept_id: str) -> List[Dict[str, Any]]:
         """
-        Fetch concepts related to a given concept.
+        Retrieve concepts related to a given concept.
         """
+
         query = """
-        MATCH (c:Concept {id: $id})-[r]->(related)
+        MATCH (c:Concept {id:$id})-[:related_to]-(related:Concept)
         RETURN related
         """
 
-        return self.graph.query(query, {"id": concept_id})
+        return self.client.run_query(query, {"id": concept_id})
 
-    def get_dependencies(self, concept_id: str):
+    def get_domain_concepts(self, domain_name: str) -> List[Dict[str, Any]]:
         """
-        Fetch concepts that a concept depends on.
+        Get all concepts belonging to a domain.
         """
+
         query = """
-        MATCH (c:Concept {id: $id})-[:depends_on]->(dep)
-        RETURN dep
-        """
-
-        return self.graph.query(query, {"id": concept_id})
-
-    def get_concepts_in_domain(self, domain_name: str):
-        """
-        Fetch all concepts belonging to a domain.
-        """
-        query = """
-        MATCH (d:Domain {name: $name})<-[:belongs_to]-(c:Concept)
+        MATCH (c:Concept)-[:belongs_to]->(d:Domain {name:$domain})
         RETURN c
         """
 
-        return self.graph.query(query, {"name": domain_name})
+        return self.client.run_query(query, {"domain": domain_name})
 
-    def find_shortest_path(self, concept_a: str, concept_b: str):
+    def get_dependencies(self, concept_id: str) -> List[Dict[str, Any]]:
         """
-        Find shortest conceptual connection path.
+        Retrieve prerequisite concepts.
         """
+
         query = """
-        MATCH (a:Concept {id: $a}),
-              (b:Concept {id: $b}),
-              p = shortestPath((a)-[*..5]-(b))
-        RETURN p
+        MATCH (c:Concept {id:$id})-[:depends_on]->(dep:Concept)
+        RETURN dep
         """
 
-        return self.graph.query(query, {"a": concept_a, "b": concept_b})
+        return self.client.run_query(query, {"id": concept_id})
+
+    def find_concept_by_name(self, name: str) -> List[Dict[str, Any]]:
+        """
+        Find concept nodes by name.
+        """
+
+        query = """
+        MATCH (c:Concept {name:$name})
+        RETURN c
+        """
+
+        return self.client.run_query(query, {"name": name})
+
+    def get_node_relationships(self, node_id: str) -> List[Dict[str, Any]]:
+        """
+        Retrieve all relationships for a node.
+        """
+
+        query = """
+        MATCH (n {id:$id})-[r]-(m)
+        RETURN type(r) as relationship, m
+        """
+
+        return self.client.run_query(query, {"id": node_id})

@@ -1,77 +1,69 @@
 import logging
-import os
+import json
+from pathlib import Path
 from datetime import datetime
+from typing import Optional
+
+from config.settings import get_settings
 
 
-LOG_DIR_BUILD = "logs/ai_build"
-LOG_DIR_ERRORS = "logs/errors"
-LOG_DIR_METRICS = "logs/metrics"
-
-
-def _ensure_log_dirs():
-    os.makedirs(LOG_DIR_BUILD, exist_ok=True)
-    os.makedirs(LOG_DIR_ERRORS, exist_ok=True)
-    os.makedirs(LOG_DIR_METRICS, exist_ok=True)
-
-
-class LoggerFactory:
+class JsonFormatter(logging.Formatter):
     """
-    Creates standardized loggers for system modules
+    JSON log formatter aligned with logging_schema.
     """
 
-    @staticmethod
-    def create_logger(module_name: str):
-        _ensure_log_dirs()
+    def format(self, record: logging.LogRecord) -> str:
 
-        logger = logging.getLogger(module_name)
-        logger.setLevel(logging.INFO)
+        log_record = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "level": record.levelname,
+            "module": record.name,
+            "event": getattr(record, "event", "log"),
+            "message": record.getMessage(),
+        }
 
-        if not logger.handlers:
-            log_file = os.path.join(
-                LOG_DIR_BUILD,
-                f"{module_name}_{datetime.utcnow().date()}.log"
-            )
-
-            handler = logging.FileHandler(log_file)
-            formatter = logging.Formatter(
-                "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-            )
-
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-
-        return logger
+        return json.dumps(log_record)
 
 
-class ErrorLogger:
+def _ensure_log_directories(root: Path):
 
-    @staticmethod
-    def log_error(module_name: str, message: str):
-        _ensure_log_dirs()
-
-        log_file = os.path.join(
-            LOG_DIR_ERRORS,
-            f"errors_{datetime.utcnow().date()}.log"
-        )
-
-        with open(log_file, "a") as f:
-            f.write(
-                f"{datetime.utcnow().isoformat()} | ERROR | {module_name} | {message}\n"
-            )
+    (root / "logs").mkdir(exist_ok=True)
+    (root / "logs" / "ai_build").mkdir(parents=True, exist_ok=True)
+    (root / "logs" / "errors").mkdir(parents=True, exist_ok=True)
+    (root / "logs" / "metrics").mkdir(parents=True, exist_ok=True)
 
 
-class MetricsLogger:
+def configure_logging():
 
-    @staticmethod
-    def log_metric(metric_name: str, value):
-        _ensure_log_dirs()
+    settings = get_settings()
 
-        log_file = os.path.join(
-            LOG_DIR_METRICS,
-            f"metrics_{datetime.utcnow().date()}.log"
-        )
+    root = settings.project_root
+    _ensure_log_directories(root)
 
-        with open(log_file, "a") as f:
-            f.write(
-                f"{datetime.utcnow().isoformat()} | {metric_name} | {value}\n"
-            )
+    logger = logging.getLogger()
+    logger.setLevel(settings.log_level)
+
+    formatter = JsonFormatter()
+
+    ai_build_handler = logging.FileHandler(root / "logs" / "ai_build" / "build.log")
+    ai_build_handler.setFormatter(formatter)
+
+    error_handler = logging.FileHandler(root / "logs" / "errors" / "errors.log")
+    error_handler.setLevel(logging.ERROR)
+    error_handler.setFormatter(formatter)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+
+    logger.handlers = []
+    logger.addHandler(ai_build_handler)
+    logger.addHandler(error_handler)
+    logger.addHandler(console_handler)
+
+
+def get_logger(name: Optional[str] = None) -> logging.Logger:
+    """
+    Retrieve configured logger.
+    """
+
+    return logging.getLogger(name)

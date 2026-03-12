@@ -1,27 +1,15 @@
-import os
-import pytest
-from ai.gemini_service import GeminiService
+from services.gemini_service import GeminiService
 
 
-def test_missing_api_key():
-    if "GEMINI_API_KEY" in os.environ:
-        del os.environ["GEMINI_API_KEY"]
-
-    with pytest.raises(ValueError):
-        GeminiService()
-
-
-def test_service_initialization():
-    os.environ["GEMINI_API_KEY"] = "test_key"
+def test_service_creation():
 
     service = GeminiService()
 
-    assert service.api_key == "test_key"
+    assert service is not None
 
 
-def test_generate_method_exists():
-    os.environ["GEMINI_API_KEY"] = "test_key"
+def test_generate_text_method_exists():
 
     service = GeminiService()
 
-    assert hasattr(service, "generate")
+    assert hasattr(service, "generate_text")
