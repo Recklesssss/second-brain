@@ -1,4 +1,4 @@
-from database.neo4j_client import Neo4jClient
+from second_brain_ai.backend.database.neo4j_client import Neo4jClient
 
 
 def test_client_initialization():

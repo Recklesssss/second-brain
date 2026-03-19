@@ -1,8 +1,8 @@
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from database.neo4j_client import get_neo4j_client
-from core.logging import get_logger
+from second_brain_ai.database.neo4j_client import get_neo4j_client
+from second_brain_ai.core.logging.logger import get_logger
 
 
 logger = get_logger(__name__)

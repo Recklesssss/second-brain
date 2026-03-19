@@ -2,7 +2,9 @@ import os
 from pathlib import Path
 from functools import lru_cache
 from typing import Optional
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class Settings:
     """

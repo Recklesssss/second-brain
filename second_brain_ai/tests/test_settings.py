@@ -1,5 +1,5 @@
 import os
-from config.settings import Settings
+from second_brain_ai.config.settings import Settings
 
 
 def test_settings_defaults():

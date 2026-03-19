@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-from config.settings import get_settings
+from second_brain_ai.config.settings import get_settings
 
 
 class JsonFormatter(logging.Formatter):

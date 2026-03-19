@@ -1,4 +1,4 @@
-from config.environment import get_settings
+from second_brain_ai.config.environment import get_settings
 
 
 def test_settings_load():

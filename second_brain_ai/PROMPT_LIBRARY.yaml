@@ -1,0 +1,37 @@
+prompt_library: "1.0"
+system_prompts:
+  agent_system_prefix: "You are an advanced AI assistant for the Second Brain learning platform."
+  json_enforcement: "You must return your output ONLY in strict, valid JSON format. Do not use any markdown formatting, backticks, or comments."
+agent_prompts:
+  research_agent:
+    concept_research: |-
+      Perform detailed research on the concept provided.
+      Concept: $concept
+      Domain (optional): $domain
+      Query (optional): $query
+      
+      Output format: {"summary": "detailed summary here", "key_points": ["point 1", "point 2"]}
+
+  learning_agent:
+    learning_module_generation: |-
+      Generate a customized learning module.
+      User Profile: $user_profile
+      Target Concept: $concept
+      Known Concepts: $known_concepts
+      
+      Output format: {"title": "Module Title", "content": "Educational content", "difficulty": "beginner/intermediate/advanced"}
+
+  idea_synthesizer:
+    idea_generation: |-
+      Synthesize the following concepts into a novel idea or application.
+      Concepts: $concepts
+      
+      Output format: {"idea_title": "Title", "synthesis": "Description of how they combine", "applications": ["app1", "app2"]}
+
+  question_generator:
+    question_generation: |-
+      Generate a quiz question for the following concept to test the user's understanding.
+      Concept Data: $concept_data
+      User Mastery Level: $mastery_level
+      
+      Output format: {"question": "The question?", "options": ["A", "B", "C", "D"], "answer": "correct option", "explanation": "why"}

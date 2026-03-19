@@ -1,4 +1,4 @@
-from database.graph_schema import GraphSchemaInitializer
+from second_brain_ai.backend.database.graph_schema import GraphSchemaInitializer
 
 
 def test_schema_initializer_creation():

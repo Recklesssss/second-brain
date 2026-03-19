@@ -1,0 +1,126 @@
+prompt_library:
+
+  version: 1.0
+  authority: true
+  description: >
+    Centralized prompt definitions used by all AI agents.
+    Agents must reference prompts from this library instead of defining prompts locally.
+
+system_prompts:
+
+  agent_system_prefix: |
+    You are part of a multi-agent AI architecture.
+    Follow the instructions precisely.
+    Return only the requested format.
+
+  json_enforcement: |
+    Return valid JSON only.
+    Do not include explanations outside JSON.
+
+agent_prompts:
+
+  research_agent:
+
+    concept_research: |
+      Research the following concept.
+
+      Concept: ${concept}
+      Domain: ${domain}
+
+      Return JSON format:
+
+      {
+        "concept": "",
+        "domain": "",
+        "explanation": "",
+        "key_points": [],
+        "related_concepts": [],
+        "references": []
+      }
+
+  learning_agent:
+
+    learning_module_generation: |
+      Adapt the concept explanation to the user's learning profile.
+
+      Concept Data:
+      ${concept_data}
+
+      User Profile:
+      ${user_profile}
+
+      Return JSON:
+
+      {
+        "concept": "",
+        "summary": "",
+        "examples": [],
+        "analogies": [],
+        "practice_exercises": []
+      }
+
+  question_generator:
+
+    question_generation: |
+      Generate learning questions for the concept.
+
+      Concept Data:
+      {concept_data}
+
+      JSON format:
+
+      {
+        "concept": "",
+        "basic_questions": [],
+        "advanced_questions": [],
+        "reflection_prompts": []
+      }
+
+  idea_synthesizer:
+
+    idea_generation: |
+      Combine these concepts and generate a new idea.
+
+      Concepts:
+      ${concepts}
+
+      Return JSON:
+
+      {
+        "idea_title": "",
+        "description": "",
+        "related_concepts": [],
+        "potential_applications": []
+      }
+
+  curriculum_builder:
+
+    curriculum_generation: |
+      Generate a structured curriculum.
+
+      Domain:
+      ${domain}
+
+      JSON format:
+
+      {
+        "domain": "",
+        "learning_sequence": [],
+        "prerequisite_graph": {}
+      }
+
+  thinking_engine:
+
+    graph_analysis: |
+      Analyze the knowledge graph.
+
+      Graph Summary:
+      ${graph_summary}
+
+      JSON format:
+
+      {
+        "patterns": [],
+        "knowledge_gaps": [],
+        "insights": []
+      }

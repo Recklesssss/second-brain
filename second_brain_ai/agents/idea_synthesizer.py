@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, Any, List
 
-from agents.base_agent import BaseAgent
-from services.gemini_service import GeminiService
+from second_brain_ai.agents.base_agent import BaseAgent
+from second_brain_ai.services.gemini_service import GeminiService
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 from typing import Dict, List, Any
 from datetime import datetime
 
-from agents.base_agent import BaseAgent
-from agents.agent_registry import AgentRegistry
+from second_brain_ai.agents.base_agent import BaseAgent
+from second_brain_ai.agents.agent_registry import AgentRegistry
 
 
 class PlanningEngine(BaseAgent):
@@ -143,3 +143,17 @@ class PlanningEngine(BaseAgent):
             "created_at": datetime.utcnow().isoformat(),
             "steps": steps
         }
+
+    async def execute(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute planning logic.
+        """
+        try:
+            task_type = payload.get("task_type")
+            if not task_type:
+                return self.error_response("AGENT_FAILURE", "task_type required")
+
+            plan = self.plan(task_type, payload)
+            return self.success_response(plan)
+        except Exception as e:
+            return self.error_response("AGENT_FAILURE", str(e))

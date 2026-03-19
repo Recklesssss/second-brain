@@ -2,8 +2,8 @@ from typing import Any, Dict, List, Optional
 from neo4j import GraphDatabase, Driver
 from contextlib import contextmanager
 
-from config.settings import get_settings
-from core.logging import get_logger
+from second_brain_ai.config.settings import get_settings
+from second_brain_ai.core.logging.logger import get_logger
 
 
 logger = get_logger(__name__)

@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import Dict, Any
 import yaml
 
-from config.settings import get_settings
+from second_brain_ai.config.settings import get_settings
 
 
 class PromptLibraryLoader:

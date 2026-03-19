@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, Any
 
-from agents.base_agent import BaseAgent
-from services.graph_service import GraphService
+from second_brain_ai.agents.base_agent import BaseAgent
+from second_brain_ai.core.knowledge_graph import KnowledgeGraphService
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class KnowledgeGraphAgent(BaseAgent):
 
     def __init__(self, agent_name: str = "knowledge_graph_agent"):
         super().__init__(agent_name)
-        self.graph_service = GraphService()
+        self.graph_service = KnowledgeGraphService()
 
     async def execute(self, payload: Dict[str, Any]) -> Dict[str, Any]:
 
@@ -29,22 +29,28 @@ class KnowledgeGraphAgent(BaseAgent):
                     "concept_data required"
                 )
 
-            concept = concept_data.get("concept")
+            concept_name = concept_data.get("concept")
             relations = concept_data.get("relations", [])
 
-            node_id = await self.graph_service.create_concept_node(concept)
+            # Create concept node
+            node = self.graph_service.create_node("Concept", {"name": concept_name, "id": concept_name})
+            node_id = node.get("id", concept_name)
 
+            relations_created = 0
             for relation in relations:
-
-                await self.graph_service.create_relationship(
-                    node_id,
-                    relation["target"],
-                    relation["type"]
-                )
+                try:
+                    self.graph_service.create_relationship(
+                        "Concept", node_id,
+                        "Concept", relation["target"],
+                        relation["type"]
+                    )
+                    relations_created += 1
+                except Exception as e:
+                    logger.warning(f"Failed to create relationship: {e}")
 
             return self.success_response({
                 "node_id": node_id,
-                "relations_created": len(relations)
+                "relations_created": relations_created
             })
 
         except Exception as e:

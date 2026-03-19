@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, Any
 
-from agents.base_agent import BaseAgent
-from services.gemini_service import GeminiService
+from second_brain_ai.agents.base_agent import BaseAgent
+from second_brain_ai.services.gemini_service import GeminiService
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,9 @@ class ResearchAgent(BaseAgent):
             }
 
             response = await self.ai_service.generate_research(prompt_data)
+
+            if "error" in response:
+                return self.error_response("AGENT_FAILURE", response["error"])
 
             return self.success_response(response)
 

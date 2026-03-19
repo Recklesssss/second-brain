@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.domain_routes import router as domain_router
-from api.learning_routes import router as learning_router
-from api.research_routes import router as research_router
+from second_brain_ai.backend.api.domain_routes import router as domain_router
+from second_brain_ai.backend.api.learning_routes import router as learning_router
+from second_brain_ai.backend.api.research_routes import router as research_router
+from second_brain_ai.backend.api.concept_routes import router as concept_router
 
 app = FastAPI(
     title="AI Second Brain API",
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(domain_router, prefix="/api")
 app.include_router(learning_router, prefix="/api")
 app.include_router(research_router, prefix="/api")
+app.include_router(concept_router, prefix="/api")
 
 
 @app.get("/")

@@ -1,0 +1,21 @@
+nodes:
+  - id: db_integration
+    type: task
+    description: "Database & Knowledge Graph Integration"
+  - id: autonomous_setup
+    type: task
+    description: "Autonomous Build Loop Structure"
+  - id: agent_setup
+    type: task
+    description: "Multi-Agent Implementation"
+  - id: observability_setup
+    type: task
+    description: "Observability and Safety"
+
+edges:
+  - source: db_integration
+    target: autonomous_setup
+  - source: autonomous_setup
+    target: agent_setup
+  - source: agent_setup
+    target: observability_setup

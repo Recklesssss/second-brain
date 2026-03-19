@@ -1,7 +1,7 @@
 from typing import Dict, Any, List
 
-from agents.agent_executor import AgentExecutionManager
-from agents.planning_engine import PlanningEngine
+from second_brain_ai.agents.agent_executor import AgentExecutionManager
+from second_brain_ai.agents.planning_engine import PlanningEngine
 
 
 class AgentWorkflowOrchestrator:

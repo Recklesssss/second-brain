@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any
 
-from agents.agent_registry import AgentRegistry
+from second_brain_ai.agents.agent_registry import AgentRegistry
 
 logger = logging.getLogger(__name__)
 

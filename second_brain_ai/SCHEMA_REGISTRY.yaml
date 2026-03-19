@@ -1,0 +1,51 @@
+schema_definitions:
+  nodes:
+    Domain:
+      properties:
+        id: "string"
+        name: "string"
+        description: "string"
+    Concept:
+      properties:
+        id: "string"
+        name: "string"
+    Idea:
+      properties:
+        id: "string"
+        title: "string"
+    Resource:
+      properties:
+        id: "string"
+        title: "string"
+        url: "string"
+    Question:
+      properties:
+        id: "string"
+        text: "string"
+    Insight:
+      properties:
+        id: "string"
+        summary: "string"
+    User:
+      properties:
+        id: "string"
+        name: "string"
+        
+  relationships:
+    BELONGS_TO:
+      source: "Concept"
+      target: "Domain"
+    DEPENDS_ON:
+      source: "Concept"
+      target: "Concept"
+    KNOWS:
+      source: "User"
+      target: "Concept"
+      properties:
+        mastery_level: "float"
+    NEEDS_TO_LEARN:
+      source: "User"
+      target: "Concept"
+    PROVIDES_KNOWLEDGE_ON:
+      source: "Resource"
+      target: "Concept"

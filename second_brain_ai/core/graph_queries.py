@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
-from database.neo4j_client import get_neo4j_client
-from core.schema_loader import get_schema_registry
-from core.logging import get_logger
+from second_brain_ai.database.neo4j_client import get_neo4j_client
+from second_brain_ai.core.schema_loader import get_schema_registry
+from second_brain_ai.core.logging.logger import get_logger
 
 
 logger = get_logger(__name__)

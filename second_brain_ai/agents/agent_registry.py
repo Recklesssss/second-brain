@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Type
 
-from agents.base_agent import BaseAgent
+from second_brain_ai.agents.base_agent import BaseAgent
 
 logger = logging.getLogger(__name__)
 

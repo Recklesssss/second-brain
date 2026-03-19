@@ -1,0 +1,42 @@
+protocol:
+  steps:
+    - id: 1
+      name: "Load context"
+      action: "Load project context."
+    - id: 2
+      name: "Read graph"
+      action: "Read AI_BUILD_GRAPH.yaml."
+    - id: 3
+      name: "Read state"
+      action: "Read AI_STATE_REGISTRY.yaml."
+    - id: 4
+      name: "Identify tasks"
+      action: "Identify tasks whose dependencies are satisfied."
+    - id: 5
+      name: "Lock task"
+      action: "Lock the selected task."
+    - id: 6
+      name: "Implement"
+      action: "Implement the task."
+    - id: 7
+      name: "Generate tests"
+      action: "Generate tests."
+    - id: 8
+      name: "Verify"
+      action: "Verify the implementation."
+    - id: 9
+      name: "Update state"
+      action: "Update AI_STATE_REGISTRY.yaml."
+    - id: 10
+      name: "Release lock"
+      action: "Release task lock."
+
+safety_rules:
+  must_not:
+    - "modify architecture files"
+    - "change schema definitions"
+    - "change task dependencies"
+  must:
+    - "generate tests"
+    - "validate schemas"
+    - "update state registry"

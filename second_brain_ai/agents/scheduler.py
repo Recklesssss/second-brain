@@ -2,7 +2,7 @@ import threading
 import time
 from typing import Dict, Any, Callable, List
 
-from agents.workflow_orchestrator import AgentWorkflowOrchestrator
+from second_brain_ai.agents.workflow_orchestrator import AgentWorkflowOrchestrator
 
 
 class AutonomousAgentScheduler:
